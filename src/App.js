@@ -4,16 +4,20 @@ import './App.css';
 import axios from "axios";
 import { useEffect, useState } from 'react';
 
-const [buh, setBuh] = useState({});
-
-
-
 function App() {
+  const [buh, setBuh] = useState({});
   useEffect(() => {
-    const response = axios.get("localhost:5050/get")
-    const data = response.json()
-    setBuh(data.buh)
+
+    const hello = async () => {
+      const response = await axios.get("http://localhost:5050/shape/");
+      const data = await response.data;
+      console.log(data)
+    }
+
+    hello();
+    
   },[]);
+
   return (
     <div className="App">
       <header className="App-header">
