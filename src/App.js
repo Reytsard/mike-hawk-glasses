@@ -11,16 +11,18 @@ function App() {
       setLoading(true);
 
       // Load the ONNX model
-      const session = await ort.InferenceSession.create('head_shape_model.onnx');
+      const session = await ort.InferenceSession.create(
+        "res/head_shape_model.onnx"
+      );
       console.log("Model loaded successfully!");
 
       // Get the uploaded image file from the input
-      const inputElement = document.getElementById('imageInput');
+      const inputElement = document.getElementById("imageInput");
       const file = inputElement.files[0];
 
       if (!file) {
-        console.error('No file uploaded!');
-        setOutput('Please upload an image.');
+        console.error("No file uploaded!");
+        setOutput("Please upload an image.");
         setLoading(false);
         return;
       }
@@ -30,15 +32,15 @@ function App() {
       const tensor = preprocessImage(image);
 
       // Feed the input tensor into the model
-      const feeds = { 'input': tensor };
+      const feeds = { input: tensor };
       const results = await session.run(feeds);
 
       // Get the output and display it
-      const output = results['output'];
+      const output = results["output"];
       setOutput(`Model Output: ${output.data}`);
     } catch (error) {
       console.error("Error loading or running model:", error);
-      setOutput('Error processing the image.');
+      setOutput("Error processing the image.");
     } finally {
       setLoading(false);
     }
@@ -62,8 +64,8 @@ function App() {
 
   // Helper function to preprocess the image (resize and normalize)
   const preprocessImage = (image) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
 
     // Resize image to 28x28 (input size for the model)
     canvas.width = 28;
@@ -81,13 +83,13 @@ function App() {
     let index = 0;
     for (let i = 0; i < data.length; i += 4) {
       // Normalize each RGB value to the range [0, 1]
-      inputData[index++] = data[i] / 255.0;    // Red
+      inputData[index++] = data[i] / 255.0; // Red
       inputData[index++] = data[i + 1] / 255.0; // Green
       inputData[index++] = data[i + 2] / 255.0; // Blue
     }
 
     // Return the tensor with shape [1, 28, 28, 3]
-    return new ort.Tensor('float32', inputData, [1, 28, 28, 3]);
+    return new ort.Tensor("float32", inputData, [1, 28, 28, 3]);
   };
 
   return (
@@ -96,7 +98,8 @@ function App() {
 
       {/* Image upload input */}
       <input type="file" id="imageInput" accept="image/*" />
-      <br /><br />
+      <br />
+      <br />
 
       {/* Run model button */}
       <button onClick={generateRecommendation} disabled={loading}>
@@ -104,7 +107,7 @@ function App() {
       </button>
 
       {/* Display the output */}
-      <div id="output" style={{ marginTop: '20px', fontSize: '20px' }}>
+      <div id="output" style={{ marginTop: "20px", fontSize: "20px" }}>
         {output ? output : "Model output will be displayed here."}
       </div>
     </div>
