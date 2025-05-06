@@ -6,6 +6,17 @@ function App() {
   const [output, setOutput] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  function getPredictedFace(value) {
+    let labels = ["Oval", "Heart", "Oblong", "Square", "Round"];
+    let highestIndex = 0;
+    for (let i = 0; i < labels.length; i++) {
+      if (value[i] >= value[highestIndex]) {
+        highestIndex = i;
+      }
+    }
+    return labels[highestIndex];
+  }
+
   const generateRecommendation = async () => {
     try {
       setLoading(true);
@@ -34,10 +45,14 @@ function App() {
       // Feed the input tensor into the model
       const feeds = { input: tensor };
       const results = await session.run(feeds);
+      const resultdata = getPredictedFace(results["sequential_2"].data);
+      /*
+        
+      */
+      //todo: map data with type of glasses then classify..
 
       // Get the output and display it
-      const output = results["output"];
-      setOutput(`Model Output: ${output.data}`);
+      setOutput(`${resultdata}`);
     } catch (error) {
       console.error("Error loading or running model:", error);
       setOutput("Error processing the image.");
@@ -89,6 +104,7 @@ function App() {
     }
 
     // Return the tensor with shape [1, 28, 28, 3]
+    console.log(inputData);
     return new ort.Tensor("float32", inputData, [1, 28, 28, 3]);
   };
 
