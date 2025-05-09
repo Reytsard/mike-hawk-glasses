@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import * as ort from "onnxruntime-web";
 import "./App.css";
 
 function App() {
   const [output, setOutput] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [glassesFrameShapes, setGlassesFrameShapes] = useState([]); 
 
   function getPredictedFace(value) {
     let labels = ["Oval", "Heart", "Oblong", "Square", "Round"];
@@ -17,6 +18,23 @@ function App() {
     return labels[highestIndex];
   }
 
+  async function getclusteredclasses(faceshape){
+    //todo
+    // let labels = ["Oval", "Heart", "Oblong", "Square", "Round"];
+    // const session2 = await ort.InferenceSession.create("res/kmeans_model.onnx");
+    // const index = labels.indexOf(output);
+    // const input = [index, 0, 135, 45, 1, 1, 0];
+    // const inputTensor = new ort.Tensor('float32',Float32Array.from(input),[1,7]); 
+    // const feeds = {input: inputTensor};
+    // const resultsdata = await session2.run(feeds);
+    // console.log(resultsdata);
+  }
+
+  const glassesMemo = useMemo(() => {
+    return glassesFrameShapes.map((glassesShape) => {
+      <h2>{glassesShape}</h2>
+    })
+  },[glassesFrameShapes]);
   const generateRecommendation = async () => {
     try {
       setLoading(true);
@@ -45,7 +63,9 @@ function App() {
       // Feed the input tensor into the model
       const feeds = { input: tensor };
       const results = await session.run(feeds);
-      const resultdata = getPredictedFace(results["sequential_2"].data);
+      const resultdata = getPredictedFace(results["sequential_1"].data);
+
+      getclusteredclasses(resultdata);
       /*
         
       */
@@ -83,18 +103,18 @@ function App() {
     const ctx = canvas.getContext("2d");
 
     // Resize image to 28x28 (input size for the model)
-    canvas.width = 28;
-    canvas.height = 28;
+    canvas.width = 86;
+    canvas.height = 86;
 
     // Draw the image onto the canvas
-    ctx.drawImage(image, 0, 0, 28, 28);
+    ctx.drawImage(image, 0, 0, 86, 86);
 
     // Get the image data (RGB values)
-    const imageData = ctx.getImageData(0, 0, 28, 28);
+    const imageData = ctx.getImageData(0, 0, 86, 86);
     const data = imageData.data;
 
     // Normalize and convert the image data into a Float32Array
-    const inputData = new Float32Array(28 * 28 * 3);
+    const inputData = new Float32Array(86 * 86 * 3);
     let index = 0;
     for (let i = 0; i < data.length; i += 4) {
       // Normalize each RGB value to the range [0, 1]
@@ -103,9 +123,9 @@ function App() {
       inputData[index++] = data[i + 2] / 255.0; // Blue
     }
 
-    // Return the tensor with shape [1, 28, 28, 3]
+    // Return the tensor with shape [1, 86, 86, 3]
     console.log(inputData);
-    return new ort.Tensor("float32", inputData, [1, 28, 28, 3]);
+    return new ort.Tensor("float32", inputData, [1, 86, 86, 3]);
   };
 
   return (
@@ -122,10 +142,22 @@ function App() {
         {loading ? "Running..." : "Run Model"}
       </button>
 
+      <h4>Results:</h4>
       {/* Display the output */}
       <div id="output" style={{ marginTop: "20px", fontSize: "20px" }}>
         {output ? output : "Model output will be displayed here."}
+        {output && <>
+            <h4>
+              Recommended Glasses Shapes:
+            </h4>
+            <div>
+              {`You have a face shape of ${output}. The recommended eyeglasses frames are `}
+              {glassesMemo}
+            </div>
+          </>
+          }
       </div>
+
     </div>
   );
 }
