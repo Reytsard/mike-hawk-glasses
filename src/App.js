@@ -164,7 +164,13 @@ function App() {
               You have a face shape of <strong>{output}</strong>. The
               recommended eyeglasses styles are:
             </p>
-            {glassesMemo}
+            {
+              faceShape == "Oval" ? 
+                <div>
+                  <h3>All glasses frames are suitable for you. Just find what you fancy the most.</h3>
+                </div>
+                : glassesMemo
+            }
           </>
         )}
       </div>
