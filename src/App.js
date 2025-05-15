@@ -8,6 +8,11 @@ function App() {
   const [glassesFrameShapes, setGlassesFrameShapes] = useState([]);
   const [faceShape, setFaceShape] = useState(null);
   const [frameData, setFrameData] = useState([]);
+  const [oval, setOval] = useState();
+  const [heart, setHeart] = useState();
+  const [oblong, setOblong] = useState();
+  const [square, setSquare] = useState();
+  const [round, setRound] = useState();
 
   useEffect(() => {
     fetchDataFrame();
@@ -61,7 +66,7 @@ function App() {
       setLoading(true);
 
       const session = await ort.InferenceSession.create(
-        "res/head_shape_model.onnx"
+        "res/new_head_shape_model.onnx"
       );
 
       const inputElement = document.getElementById("imageInput");
@@ -78,6 +83,12 @@ function App() {
 
       const feeds = { input: tensor };
       const results = await session.run(feeds);
+      const data = results["sequential_1"].data;
+      setOval(data[0] * 100);
+      setHeart(data[1] * 100);
+      setOblong(data[2] * 100);
+      setSquare(data[3] * 100);
+      setRound(data[4] * 100);
       const resultdata = getPredictedFace(results["sequential_1"].data);
 
       setOutput(resultdata);
@@ -156,21 +167,30 @@ function App() {
 
       <h4>Results:</h4>
       <div id="output" style={{ marginTop: "20px", fontSize: "20px" }}>
-        {output ? output : "Model output will be displayed here."}
+        {output ? <h2>{output}</h2> : "Model output will be displayed here."}
+        {oval && <div>Oval: {oval}%</div>}
+        {heart && <div>Heart: {heart}%</div>}
+        {oblong && <div>Oblong: {oblong}%</div>}
+        {square && <div>Square: {square}%</div>}
+        {round && <div>Round: {round}%</div>}
         {output && (
           <>
             <h4>Recommended Glasses Styles:</h4>
+
             <p>
               You have a face shape of <strong>{output}</strong>. The
               recommended eyeglasses styles are:
             </p>
-            {
-              faceShape == "Oval" ? 
-                <div>
-                  <h3>All glasses frames are suitable for you. Just find what you fancy the most.</h3>
-                </div>
-                : glassesMemo
-            }
+            {faceShape == "Oval" ? (
+              <div>
+                <h3>
+                  All glasses frames are suitable for you. Just find what you
+                  fancy the most.
+                </h3>
+              </div>
+            ) : (
+              glassesMemo
+            )}
           </>
         )}
       </div>
